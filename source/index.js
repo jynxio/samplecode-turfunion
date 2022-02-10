@@ -66,14 +66,12 @@ const position_2 = [ [ 50, 50 ], [ 40, 50 ], [ 40, - 50 ], [ 50, - 50 ] ];
 const position_3 = [ [ 50, - 50 ], [ 50, - 40 ], [ - 50, - 40 ], [ - 50, - 50 ] ];
 const position_4 = [ [ - 50, - 50 ], [ - 40, - 50 ], [ - 40, 50 ], [ - 50, 50 ] ];
 const position_5 = [ [ - 5, 50 ], [ - 5, - 50 ], [ 5, - 50 ], [ 5, 50 ] ];
-const union_1 = greinerhormann.union( position_1, position_3 );console.log( union_1 );
 
 const polygon_1 = createPolygon( position_1, 0xff0000, true );
 const polygon_2 = createPolygon( position_2, 0x00ff00, true );
 const polygon_3 = createPolygon( position_3, 0x0000ff, true );
 const polygon_4 = createPolygon( position_4, 0xffff00, true );
 const polygon_5 = createPolygon( position_5, 0xff00ff, true );
-const polygon_union_1 = createPolygon( union_1[ 0 ], 0xffffff, false );
 
 scene.add(
     polygon_1,
@@ -81,9 +79,8 @@ scene.add(
     polygon_3,
     polygon_4,
     polygon_5,
-    polygon_union_1,
 );
-console.log( turfunion );
+
 function createPolygon( data, color, wireframe ) {
 
     /*  */
