@@ -6,7 +6,7 @@ import earcut from "earcut";
 
 import * as greinerhormann from "greiner-hormann";
 
-import turfunion from "@turf/union";
+import * as turf from "@turf/turf";
 
 /* ------------------------------------------------------------------------------------------------------ */
 /* CSS */
@@ -61,11 +61,13 @@ renderer.setAnimationLoop( function loop() {
 } );
 
 /* ------------------------------------------------------------------------------------------------------ */
-const position_1 = [ [ - 50, 50 ], [ - 50, 40 ], [ 50, 40 ], [ 50, 50 ] ];
-const position_2 = [ [ 50, 50 ], [ 40, 50 ], [ 40, - 50 ], [ 50, - 50 ] ];
-const position_3 = [ [ 50, - 50 ], [ 50, - 40 ], [ - 50, - 40 ], [ - 50, - 50 ] ];
-const position_4 = [ [ - 50, - 50 ], [ - 40, - 50 ], [ - 40, 50 ], [ - 50, 50 ] ];
-const position_5 = [ [ - 5, 50 ], [ - 5, - 50 ], [ 5, - 50 ], [ 5, 50 ] ];
+const positions = [ // 非linear ring
+    [ - 50, 50, - 50, 40, 50, 40, 50, 50 ],
+    [ 50, 50, 40, 50, 40, - 50, 50, - 50 ],
+    [ 50, - 50, 50, - 40, - 50, - 40, - 50, - 50 ],
+    [ - 50, - 50, - 40, - 50, - 40, 50, - 50, 50 ],
+    [ - 5, 50, - 5, - 50, 5, - 50, 5, 50 ],
+];
 
 const polygon_1 = createPolygon( position_1, 0xff0000, true );
 const polygon_2 = createPolygon( position_2, 0x00ff00, true );
@@ -73,25 +75,12 @@ const polygon_3 = createPolygon( position_3, 0x0000ff, true );
 const polygon_4 = createPolygon( position_4, 0xffff00, true );
 const polygon_5 = createPolygon( position_5, 0xff00ff, true );
 
-scene.add(
-    polygon_1,
-    polygon_2,
-    polygon_3,
-    polygon_4,
-    polygon_5,
-);
-
 function createPolygon( data, color, wireframe ) {
 
     /*  */
     const geometry = new three.BufferGeometry();
     const material = new three.MeshBasicMaterial( { color, wireframe } );
     const mesh = new three.Mesh( geometry, material );
-
-    /*  */
-    const flat_array = [];
-
-    data.forEach( item => flat_array.push( ...item, 0 ) );
 
     /*  */
     let position;
@@ -117,5 +106,50 @@ function createPolygon( data, color, wireframe ) {
 
     /*  */
     return mesh;
+
+}
+
+/**
+ *
+ * @param  {Array} input - 比如[ p_1, p_2, ... ]，其中p_1是[ x, y, x, y, ... ]
+ */
+function union( ...input ) {
+
+    const turfpolygons = input.map( item => {
+
+        const coordinate = [];
+
+        for ( let i = 0; i < item.length; i += 2 ) {
+
+            const x = item[ i + 0 ];
+            const y = item[ i + 1 ];
+            const pair = [ x, y ];
+
+            coordinate.push( pair );
+
+        }
+
+        const turfpolygon = {
+            geometry: {
+                type: "Polygon",
+                coordinates: [ coordinate ],
+            },
+            properties: {},
+            type: "Feature"
+        };
+
+        return turfpolygon;
+
+    } );
+
+    let turfunion = turfpolygons[ 0 ];
+
+    for ( let i = 1; i < turfpolygons.length; i++ ) {
+
+        turfunion = turf.union( turfunion, turfpolygons[ i ] );
+
+    }
+
+    return turfunion;
 
 }
