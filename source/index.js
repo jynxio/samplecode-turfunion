@@ -61,21 +61,80 @@ renderer.setAnimationLoop( function loop() {
 } );
 
 /* ------------------------------------------------------------------------------------------------------ */
-const positions = [ // 非linear ring
-    [ - 50, 50, - 50, 40, 50, 40, 50, 50 ],
-    [ 50, 50, 40, 50, 40, - 50, 50, - 50 ],
-    [ 50, - 50, 50, - 40, - 50, - 40, - 50, - 50 ],
-    [ - 50, - 50, - 40, - 50, - 40, 50, - 50, 50 ],
-    [ - 5, 50, - 5, - 50, 5, - 50, 5, 50 ],
-];
+/* Main */
+main();
 
-const polygon_1 = createPolygon( position_1, 0xff0000, true );
-const polygon_2 = createPolygon( position_2, 0x00ff00, true );
-const polygon_3 = createPolygon( position_3, 0x0000ff, true );
-const polygon_4 = createPolygon( position_4, 0xffff00, true );
-const polygon_5 = createPolygon( position_5, 0xff00ff, true );
+async function main() {
 
-function createPolygon( data, color, wireframe ) {
+    const data = await fetchData();
+
+    console.log( data );
+
+}
+
+/* ------------------------------------------------------------------------------------------------------ */
+/**
+ * 获取并返回data.json的数据。
+ * @returns {Array} - 一个存储多个GeoJSON Object的数组，turf/polygon方法的返回值也是一个GeoJSON Object。
+ */
+async function fetchData() {
+
+    let data;
+
+    data = await fetch("/static/data.json");
+    data = await data.json();
+    data = data.features;
+
+    return data;
+
+}
+
+/* ------------------------------------------------------------------------------------------------------ */
+/**
+ * 将GeoJSON Object转换成earcut的3个参数，分别是vertex、hole、dimension。注意，该程序将经度转换为x，纬度转换为y，并自动填补
+ * 值为0的z，因此输出结果中的dimension是3。
+ * @param {Array} input - GeoJSON Object数据。
+ * @returns {Object} - 一个拥有3个属性的对象，分别是vertex、hole、dimension。
+ */
+function convertToFlatArray( input ) {
+
+    const coordinates = input.geometry.coordinates;
+
+    const hole = [];
+    const vertex = [];
+
+    for ( let i = 0; i < coordinates.length; i++ ) {
+
+        const linear_ring = coordinates[ i ];
+
+        for ( let j = 0; j < linear_ring.length; j++ ) {
+
+            const [ x, y ] = linear_ring[ j ];
+
+            vertex.push( x, y, 0 );
+
+        }
+
+    }
+
+}
+
+
+/* ------------------------------------------------------------------------------------------------------ */
+/* 绘制矩形 */
+// positions.forEach( position => {
+
+//     return;
+
+//     const color = Math.round( Math.random() * 0xffffff );
+
+//     const mesh = createPolygon( position, undefined, 3, color, true );
+
+//     scene.add( mesh );
+
+// } );
+
+function createPolygon( vertex, hole, dimension, color, wireframe ) {
 
     /*  */
     const geometry = new three.BufferGeometry();
@@ -85,7 +144,7 @@ function createPolygon( data, color, wireframe ) {
     /*  */
     let position;
 
-    position = new Float32Array( flat_array );
+    position = new Float32Array( vertex );
     position = new three.BufferAttribute( position, 3 );
 
     geometry.setAttribute( "position", position );
@@ -93,7 +152,7 @@ function createPolygon( data, color, wireframe ) {
     /*  */
     let index;
 
-    index = earcut( flat_array, null, 3 );
+    index = earcut( vertex, hole, dimension );
     index = new Uint16Array( index );
     index = new three.BufferAttribute( index, 1 );
 
@@ -108,6 +167,9 @@ function createPolygon( data, color, wireframe ) {
     return mesh;
 
 }
+
+/* ------------------------------------------------------------------------------------------------------ */
+/* 融合矩形 */
 
 /**
  *

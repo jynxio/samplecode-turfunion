@@ -1,0 +1,160 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -50,
+                            50
+                        ],
+                        [
+                            -50,
+                            40
+                        ],
+                        [
+                            50,
+                            40
+                        ],
+                        [
+                            50,
+                            50
+                        ],
+                        [
+                            -50,
+                            50
+                        ]
+                    ]
+                ]
+            },
+            "properties": {}
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            50,
+                            50
+                        ],
+                        [
+                            40,
+                            50
+                        ],
+                        [
+                            40,
+                            -50
+                        ],
+                        [
+                            50,
+                            -50
+                        ],
+                        [
+                            50,
+                            50
+                        ]
+                    ]
+                ]
+            },
+            "properties": {}
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            50,
+                            -50
+                        ],
+                        [
+                            50,
+                            -40
+                        ],
+                        [
+                            -50,
+                            -40
+                        ],
+                        [
+                            -50,
+                            -50
+                        ],
+                        [
+                            50,
+                            -50
+                        ]
+                    ]
+                ]
+            },
+            "properties": {}
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -50,
+                            -50
+                        ],
+                        [
+                            -40,
+                            -50
+                        ],
+                        [
+                            -40,
+                            50
+                        ],
+                        [
+                            -50,
+                            50
+                        ],
+                        [
+                            -50,
+                            -50
+                        ]
+                    ]
+                ]
+            },
+            "properties": {}
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            5,
+                            50
+                        ],
+                        [
+                            -5,
+                            50
+                        ],
+                        [
+                            -5,
+                            -50
+                        ],
+                        [
+                            5,
+                            -50
+                        ],
+                        [
+                            5,
+                            50
+                        ]
+                    ]
+                ]
+            },
+            "properties": {}
+        }
+    ]
+}
