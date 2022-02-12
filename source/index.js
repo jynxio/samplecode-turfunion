@@ -4,9 +4,7 @@ import * as three from "three";
 
 import earcut from "earcut";
 
-import * as greinerhormann from "greiner-hormann";
-
-import * as turf from "@turf/turf";
+import turfunion from "@turf/union";
 
 /* ------------------------------------------------------------------------------------------------------ */
 /* CSS */
@@ -66,9 +64,43 @@ main();
 
 async function main() {
 
-    const data = await fetchData();
+    /* 获取数据 */
+    const geojson_object_array = await fetchData();
 
-    console.log( data );
+    /* 融合 */
+    const geojson_object_union = union( geojson_object_array );
+
+    /* 绘制融合图形 */
+    const earcut_parameter_union = convertToEarcutParameter( geojson_object_union );
+
+    const { vertex, hole, dimension } = earcut_parameter_union;
+    const color = 0x333333;
+    const wireframe = false;
+
+    const mesh = createPolygon( vertex, hole, dimension, color, wireframe );
+
+    scene.add( mesh );
+
+    /* 绘制解构图形 */
+    const earcut_parameter_array =  geojson_object_array.map( geojson_object => {
+
+        const earcut_parameter = convertToEarcutParameter( geojson_object );
+
+        return earcut_parameter;
+
+    } );
+
+    earcut_parameter_array.forEach( earcut_parameter => {
+
+        const { vertex, hole, dimension } = earcut_parameter;
+        const color = Math.round( Math.random() * 0xffffff );
+        const wireframe = true;
+
+        const mesh = createPolygon( vertex, hole, dimension, color, wireframe );
+
+        scene.add( mesh );
+
+    } );
 
 }
 
@@ -96,12 +128,13 @@ async function fetchData() {
  * @param {Array} input - GeoJSON Object数据。
  * @returns {Object} - 一个拥有3个属性的对象，分别是vertex、hole、dimension。
  */
-function convertToFlatArray( input ) {
+function convertToEarcutParameter( input ) {
 
     const coordinates = input.geometry.coordinates;
 
     const hole = [];
     const vertex = [];
+    const dimension = 3;
 
     for ( let i = 0; i < coordinates.length; i++ ) {
 
@@ -115,25 +148,37 @@ function convertToFlatArray( input ) {
 
         }
 
+        if ( !i ) continue; // 当coordinates拥有的linear ring的数量大于1时，执行下述代码来创建hole。
+
+        hole.push(
+            hole.length === 0
+            ? coordinates[ i - 1 ].length
+            : (coordinates[ i - 1 ].length + hole[ hole.length - 1 ] )
+        );
+
     }
+
+    const output = {
+        hole: hole.length === 0 ? null : hole,
+        vertex,
+        dimension,
+    };
+
+    return output;
 
 }
 
 
 /* ------------------------------------------------------------------------------------------------------ */
-/* 绘制矩形 */
-// positions.forEach( position => {
-
-//     return;
-
-//     const color = Math.round( Math.random() * 0xffffff );
-
-//     const mesh = createPolygon( position, undefined, 3, color, true );
-
-//     scene.add( mesh );
-
-// } );
-
+/**
+ * 创建Mesh实例。
+ * @param {*} vertex
+ * @param {*} hole
+ * @param {*} dimension
+ * @param {*} color
+ * @param {*} wireframe
+ * @returns - Mesh实例。
+ */
 function createPolygon( vertex, hole, dimension, color, wireframe ) {
 
     /*  */
@@ -169,49 +214,33 @@ function createPolygon( vertex, hole, dimension, color, wireframe ) {
 }
 
 /* ------------------------------------------------------------------------------------------------------ */
-/* 融合矩形 */
-
 /**
- *
- * @param  {Array} input - 比如[ p_1, p_2, ... ]，其中p_1是[ x, y, x, y, ... ]
+ * 融合图形。
+ * @param  {Array} input - 一个数组，它拥有至少2个GeoJSON Object（必须是Polygon类型）。
+ * @returns {Object} - GeoJSON Object。
  */
-function union( ...input ) {
+function union( input ) {
 
-    const turfpolygons = input.map( item => {
+    if ( input.length < 2 ) {
 
-        const coordinate = [];
+        console.error("传入的GeoJSOn Object的数量小于2。");
 
-        for ( let i = 0; i < item.length; i += 2 ) {
-
-            const x = item[ i + 0 ];
-            const y = item[ i + 1 ];
-            const pair = [ x, y ];
-
-            coordinate.push( pair );
-
-        }
-
-        const turfpolygon = {
-            geometry: {
-                type: "Polygon",
-                coordinates: [ coordinate ],
-            },
-            properties: {},
-            type: "Feature"
-        };
-
-        return turfpolygon;
-
-    } );
-
-    let turfunion = turfpolygons[ 0 ];
-
-    for ( let i = 1; i < turfpolygons.length; i++ ) {
-
-        turfunion = turf.union( turfunion, turfpolygons[ i ] );
+        return;
 
     }
 
-    return turfunion;
+    let output = input[ 0 ];
+
+    let index = 1;
+
+    while ( index < input.length ) {
+
+        output = turfunion( output, input[ index ] );
+
+        index++;
+
+    }
+
+    return output;
 
 }

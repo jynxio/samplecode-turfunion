@@ -14,9 +14,8 @@
         "webpack-merge": "^5.8.0"
     },
     "dependencies": {
-        "@turf/turf": "^6.5.0",
+        "@turf/union": "^6.5.0",
         "earcut": "^2.2.3",
-        "greiner-hormann": "^1.4.2",
         "three": "^0.137.5"
     }
 }
